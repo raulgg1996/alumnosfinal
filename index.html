@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>APP-ALUMNOS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://bootswatch.com/4/flatly/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+      <style type="text/css">
+        .container{
+          padding: 10px;
+          font-weight: 600;
+          font-size: 20px;
+          background-color: #1883ba;
+          border-radius: 6px;
+          border: 2px solid #0016b0;
+        }
+      </style>
+
+</head>
+<body style="background-color:rgb(91, 191, 204);">
+        <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+            <img src="assets/caret.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+            <h3>Tecnologias Informaticas</h3>
+        </a>
+        </nav>
+    <div class="container">
+    <form action="">
+        <input type="text" placeholder="Nombre" name="nombre" id="nombre" style="color:rgb(0, 26, 255)">
+        <input type="text" placeholder="Clave" name="clave" id="clave" style="color:rgb(0, 26, 255)">
+        <button id="act" type="button" style="color:rgb(233, 88, 21)"> Agregar </button>
+    </form>
+<br>
+<div class="clear"></div>
+    <div>
+        <h4> Lista de Alumnos </h4>
+        <ul id="lista-alumnos" class="list-group">
+
+        </ul>
+    </div>
+
+</div>
+</body>
+
+<script>
+    //cunado el documento este listo y todos los objetos 
+    $(document).ready( function(){
+        //Una vez que este listo el documento obtendremos la lista de alumnos y la mostraremos.
+        getAlumnos();
+        //Programacion del boton act para obtener datos del input.
+        $("#act").on("click", function(event){
+            console.log(event);
+            var alumno = { }; //Creacion de objeto con la info necesaria.
+            alumno.nombre = $("#nombre").val();
+            alumno.clave = $("#clave").val();
+            //Invocamos a la funcion para llamadas post y mandamos el obeto.
+            sendPOSTRequest(alumno);
+        });
+    });
+    function getAlumnos(){
+        //LLamada GET para obtener los alumnos
+        //Se muestra resultado con una lista en HTML
+        //Se utiliza un ciclo for y se genera el codigo HTML
+        //Usando Jquery se coloca el HTML en la lista.
+        $.get("http://localhost:3000/alumnos", function(data){
+            var listHTML = "";
+            console.log(data);
+            data.forEach(alumno => {
+                listHTML += "<li class='list-group-item'>" + 
+                " <button type='button' class='delete btn btn-danger btn-sm' data-clave='"+ alumno.clave +"'> <i class='material-icons'>delete</i> </button> " + 
+                "  Nombre: " + alumno.nombre + " ||| Clave : " + alumno.clave + " </li>";
+            });
+            $("#lista-alumnos").html(listHTML);
+            //Programacion para los botones delete
+            $(".delete").on("click", (event) =>{
+                console.log("Button delete");
+                console.log(event.target);
+                sendDELETERequest({ "clave" : event.target.dataset["clave"] });
+            });
+        });
+    }
+    function sendPOSTRequest(body_object){
+        //Llamada post al backend usando jquery.
+        
+        $.post("http://localhost:3000/alumnos", body_object , 
+        function(){
+            alert("Alumno guardado.");
+            //Actualizamos la lista html para ver los cambios.
+            getAlumnos();
+        });
+    }
+    function sendDELETERequest(body_object) {
+        //Llamada delete al backend por medio de jquery
+        $.ajax({
+            method: "DELETE",
+            url: "http://localhost:3000/alumnos",
+            data: body_object
+            })
+            .done(function( msg ) {
+                alert( "Alumno eliminado: " + body_object.clave );
+            })
+            .fail(function(msg){
+                alert("Error al eliminar alumno: " + body_object.clave)
+            }); 
+            getAlumnos();
+    }
+</script>
+</html>
